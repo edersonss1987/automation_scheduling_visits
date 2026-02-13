@@ -1,0 +1,55 @@
+# Ambiente virtual
+venv/
+.env
+
+# Python
+__pycache__/
+*.pyc
+
+# Jupyter
+.ipynb_checkpoints/
+
+# VS Code
+.vscode/
+
+# Sistema
+.DS_Store
+
+
+# ========================
+# Dados
+# ========================
+*.csv
+*.xlsx
+*.xls
+*.json
+
+# ========================
+# Imagens
+# ========================
+*.png
+*.jpg
+*.jpeg
+
+# ========================
+# Ambiente virtual
+# ========================
+venv/
+.env
+
+# ========================
+# Python
+# ========================
+__pycache__/
+*.pyc
+
+# ========================
+# VS Code
+# ========================
+.vscode/
+
+# ========================
+# Sistema
+# ========================
+.DS_Store
+Thumbs.db
