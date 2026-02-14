@@ -1,37 +1,40 @@
-import pyautogui as g
-import time as t
-import datetime
-import re
-import os
-import pandas as pd
+# importando as bibliotecas necessárias para a automação, manipulação de dados e expressões regulares
+
+import pyautogui as g # biblioteca para automação de ações do mouse e teclado na maquina local
+import time as t      # biblioteca para controle de tempo e pausas entre as ações, executando no test mode
+import datetime       # biblioteca para manipulação de datas e horas, responsavel por tratar as datas e extrair informações como dia da semana e mês
+import re             # biblioteca para expressões regulares, utilizada para criar padrões de busca e extração de informações específicas dos textos, como endereços
+import os             # biblioteca para manipulação de arquivos e diretórios, utilizada para salvar os arquivos baixados e acessar variáveis de ambiente
+import pandas as pd   # biblioteca para manipulação de dados, utilizada para criar e manipular dataframes, facilitando a organização e análise dos dados extraídos
 
 
 from playwright.sync_api import sync_playwright, Page, Error, expect
 from dotenv import load_dotenv
 
-load_dotenv()
+load_dotenv() # Carrega as variáveis de ambiente do arquivo .env para o ambiente de execução do script
 
-usuario = os.getenv("UNO_USER")
-senha = os.getenv("UNO_PASSWORD")
-URL = os.getenv("URL")
+usuario = os.getenv("UNO_USER")           # Variável de ambiente para o nome de usuário, armazenada no arquivo .env
+senha = os.getenv("UNO_PASSWORD")         # import da variável de ambiente para a senha, armazenada no arquivo .env
+URL = os.getenv("URL")                    # import da variável de ambiente para a URL, armazenada no arquivo .env  
 
 
 g.press("WIN")
 t.sleep(0.5)
-g.write("OpenVPN GUI")
+g.write("OpenVPN GUI")                    # Digitando "OpenVPN GUI" para buscar o aplicativo no menu iniciar
 t.sleep(0.5)
 g.press("ENTER")
 t.sleep(0.5)
-g.hotkey('win', 'b')
+g.hotkey('win', 'b')                      # Atalho para acessar a barra de tarefas, onde o ícone do OpenVPN GUI deve estar localizado
 t.sleep(0.5)
 g.press("ENTER")
 
 
 t.sleep(0.5)
 
-# Região aproximada da bandeja
 
-
+# Função para verificar se a VPN já está conectada, utilizando uma imagem de referência para identificar o status da conexão. 
+# Se a VPN estiver conectada, a função chama a função de raspagem de dados. 
+# Caso contrário, ela inicia o processo de conexão. Caso a imagem de VPN conectada não seja encontrada, a função exibe uma mensagem de erro e aguarda um momento antes de prosseguir para a próxima etapa. A função é projetada para ser robusta, lidando com possíveis exceções relacionadas à localização da imagem na tela.
 def vpn_conectada():
 
     regiao_de_cenexao_da_vpn_loc = _loc = (1156, 727, 684, 289)
@@ -39,7 +42,7 @@ def vpn_conectada():
     try:
 
         imagem_vpn_conectada = g.locateOnScreen(
-            'PC_OpenVPN_ja_conectado_.png', region=regiao_de_cenexao_da_vpn_loc, grayscale=True, confidence=0.9)
+            'PC_OpenVPN_ja_conectado_.png', region=regiao_de_cenexao_da_vpn_loc, grayscale=True, confidence=0.9) # Localiza a imagem da VPN "conectada" 
 
         if imagem_vpn_conectada:
 
@@ -52,12 +55,13 @@ def vpn_conectada():
 
     except g.ImageNotFoundException as e:
 
-        print(f"Imagem de VPN conectada não encontrada. Verifique se a VPN está conectada ou se a imagem de referência é adequada.")
+        print(f"Imagem de VPN conectada não encontrada. Verifique se a VPN está conectada ou se a imagem de referência é adequada.") # Exibe uma mensagem de erro caso a imagem de VPN conectada não seja encontrada, sugerindo verificar o status da conexão ou a adequação da imagem de referência.
 
     finally:
         t.sleep(1)
 
 
+# Função responsavel em Localizar o icone da OpenVPN na bandeja, isso depois de ser executado o aplicativo
 def get_bandeja_region():
 
     regiaoDaBandeja_loc = (1507, 902, 339, 100)
@@ -65,17 +69,17 @@ def get_bandeja_region():
     try:
 
         img_PC_OpenVPN = g.locateOnScreen(
-            "PC_OpenVPN.png", grayscale=True, region=regiaoDaBandeja_loc, confidence=0.9)
+            "PC_OpenVPN.png", grayscale=True, region=regiaoDaBandeja_loc, confidence=0.9) # Localiza a imagem do ícone do OpenVPN na bandeja do sistema.
         t.sleep(1)
         center = g.center(img_PC_OpenVPN)
         g.rightClick(center)
         t.sleep(1)
 
-    except g.ImageNotFoundException as e:
+    except g.ImageNotFoundException as e: # Caso seja exibida a mensagem de erro
 
         print(f"Ícone do OpenVPN não encontrado na bandeja. Verifique se o OpenVPN GUI está aberto e o ícone é visível.")
 
-        if vpn_conectada():
+        if vpn_conectada(): # Verifica se a VPN já está conectada, caso esteja, exibe a mensagem de que a VPN já está conectada e prossegue com a raspagem de dados.
 
             print("VPN já está conectada. Prosseguindo com a raspagem de dados.")
 
@@ -523,7 +527,7 @@ for texto in old_list:
         new_list.append(erro)
 
 
-# Esse trexo de codigo é usado apenas como conderencia dos dados de endereço
+# Esse trecho de codigo é usado apenas como conderencia dos dados de endereço
 ###
 ###
 df['Endereço_'] = new_list
