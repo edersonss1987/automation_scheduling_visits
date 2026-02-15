@@ -199,9 +199,9 @@ def raspagem_de_dados():
         t.sleep(6)
         acessar_pagina(page)
         t.sleep(2)
-        page.get_by_role("textbox", name="Login").fill("usuario") # Preenchendo o campo de login com a variável de ambiente "usuario" da minha .env\
+        page.get_by_role("textbox", name="Login").fill(usuario) # Preenchendo o campo de login com a variável de ambiente "usuario" da minha .env\
         t.sleep(1)
-        page.get_by_role("textbox", name="Senha").fill("senha") # Preenchendo o campo de senha com a variável de ambiente "senha" da minha .env
+        page.get_by_role("textbox", name="Senha").fill(senha) # Preenchendo o campo de senha com a variável de ambiente "senha" da minha .env
         t.sleep(1)
         page.get_by_role("button", name="Entrar").click()
         print(page.title())
@@ -247,12 +247,35 @@ def raspagem_de_dados():
         t.sleep(1)
         browser.close() # Fecha o navegador após a conclusão da raspagem de dados
 
+try:
+    
+    get_bandeja_region() # Localiza o ícone do OpenVPN na bandeja e clica com o botão direito para acessar as opções de conexão
+except g.ImageNotFoundException as e:
+    pass
 
-get_bandeja_region() # Localiza o ícone do OpenVPN na bandeja e clica com o botão direito para acessar as opções de conexão
 
-clicar_em_escolher_backup() # Clica no botão "Escolher Backup" para abrir a janela de seleção de backup, e em caso de erro, tenta localizar o botão novamente após aguardar um tempo.
-clicar_em_conectar() # Clica no botão "Conectar" para iniciar a conexão VPN, e em caso de erro, exibe uma mensagem indicando que o botão não foi encontrado.
-raspagem_de_dados() # Realiza a raspagem de dados utilizando o Playwright para automação de navegador, com etapas para acessar a página, fazer login, navegar pelos frames e realizar ações para buscar e exportar os dados necessários, incluindo tratamento de pop-ups e downloads.
+
+
+
+try:
+    
+    clicar_em_escolher_backup() # Clica no botão "Escolher Backup" para abrir a janela de seleção de backup, e em caso de erro, tenta localizar o botão novamente após aguardar um tempo.
+except g.ImageNotFoundException as e:
+    pass
+
+
+try:
+    
+    clicar_em_conectar() # Clica no botão "Conectar" para iniciar a conexão VPN, e em caso de erro, exibe uma mensagem indicando que o botão não foi encontrado.
+except g.ImageNotFoundException as e:
+    pass
+
+
+try:
+    
+    raspagem_de_dados() # Realiza a raspagem de dados utilizando o Playwright para automação de navegador, com etapas para acessar a página, fazer login, navegar pelos frames e realizar ações para buscar e exportar os dados necessários, incluindo tratamento de pop-ups e downloads.
+except Error as e:
+    pass
 
 
 t.sleep(1)
@@ -596,13 +619,13 @@ for texto in old_list:
         new_list.append(erro)
 
 
-# Esse trecho de codigo é usado apenas como conderencia dos dados de endereço
+# Esse trecho de codigo pode-se ser usado para validar os dados de endereço, porem ele não extrai os dados de bairro, apenas faz um merge com "SP", por tanto, eu recomendo usar o campo "Endereço".
 ###
 ###
 df['Endereço_'] = new_list
-df['Endereço_'] = df['Endereço_'].apply(inserir_virgula)
-df["São Paulo"] = " - SÃO PAULO"
-df["Endereço_"] = df["Endereço_"] + df["São Paulo"]
+df['Endereço_'] = df['Endereço_'].apply(inserir_virgula) # Aplicando a função para inserir uma vírgula entre o nome do logradouro e o número do endereço, utilizando uma expressão regular para identificar o padrão de logradouro seguido por um número, e substituindo por uma vírgula para facilitar a leitura e análise dos endereços extraídos.
+df["São Paulo"] = " - SÃO PAULO"                        # Criando uma nova coluna "São Paulo" com o valor fixo " - SÃO PAULO" para ser concatenada posteriormente com a coluna "Endereço_", adicionando a informação de localização aos endereços extraídos, facilitando a identificação de que os endereços estão localizados em São Paulo, e melhorando a clareza dos dados para análises futuras.
+df["Endereço_"] = df["Endereço_"] + df["São Paulo"] # Concatenando a coluna "Endereço_" com a string " - SÃO PAULO" para adicionar a informação de localização aos endereços extraídos, facilitando a identificação de que os endereços estão localizados em São Paulo, e melhorando a clareza dos dados para análises futuras.
 ###
 ###
 # _____________________________
@@ -616,15 +639,15 @@ df['base_Data_da_visita'] = pd.to_datetime(
     errors='coerce'
 )
 
-
-df['Dia da semana'] = df['base_Data_da_visita'].dt.day_name().replace(diaspt)
-df['Mes'] = df['base_Data_da_visita'].dt.month_name().replace(mesespt)
-df['Dia da semana'] = df['base_Data_da_visita'].dt.day_name().replace(diaspt)
+# Criando colunas para dia da semana e mês em português, utilizando os dicionários de mapeamento definidos anteriormente para traduzir os nomes dos dias da semana e meses do inglês para o português, facilitando a análise temporal dos dados extraídos.
+df['Dia da semana'] = df['base_Data_da_visita'].dt.day_name().replace(diaspt) # Criando uma nova coluna "Dia da semana" a partir da coluna "base_Data_da_visita", utilizando o método dt.day_name() para extrair o nome do dia da semana em inglês, e depois aplicando o método replace() com o dicionário de mapeamento "diaspt" para traduzir os nomes dos dias da semana do inglês para o português, facilitando a análise temporal dos dados extraídos.
+df['Mes'] = df['base_Data_da_visita'].dt.month_name().replace(mesespt) # Criando uma nova coluna "Mes" a partir da coluna "base_Data_da_visita", utilizando o método dt.month_name() para extrair o nome do mês em inglês, e depois aplicando o método replace() com o dicionário de mapeamento "mesespt" para traduzir os nomes dos meses do inglês para o português, facilitando a análise temporal dos dados extraídos.
+df['Dia da semana'] = df['base_Data_da_visita'].dt.day_name().replace(diaspt) # Criando uma nova coluna "Dia da semana" a partir da coluna "base_Data_da_visita", utilizando o método dt.day_name() para extrair o nome do dia da semana em inglês, e depois aplicando o método replace() com o dicionário de mapeamento "diaspt" para traduzir os nomes dos dias da semana do inglês para o português, facilitando a análise temporal dos dados extraídos.
 
 
 # Os dados abaixo seram enviados ao telegram
 df_telegtam = df[['Dia da semana', 'Dt Comprometida', 'Cliente',
-                  'Endereço_', 'Atendente', 'Defeito Relatado', 'Descrição', 'Modalidade']]
+                  'Endereço', 'Atendente', 'Defeito Relatado', 'Descrição', 'Modalidade']]
 
 df_telegtam.to_csv('dados_para_telegram.csv',
                    index=False, encoding='utf-8-sig')
