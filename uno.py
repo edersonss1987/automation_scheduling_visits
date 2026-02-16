@@ -27,7 +27,8 @@ senha = os.getenv("UNO_PASSWORD")
 URL = os.getenv("URL")
 
 TOKEN_TELEGRAM = os.getenv("TOKEN")
-CHAT_ID_USER_EDER = os.getenv("CHAT_ID")  # ID do usuário  que vai receber
+CHAT_ID_USER_EDER = os.getenv("CHAT_ID_PESSOAL")  # ID do usuário  que vai receber
+CHAT_ID_CORPORATIVO = os.getenv("CHAT_ID_CORPORATIVO")  # ID do grupo corporativo
 
 
 print(os.path.exists("PC_OpenVPN.png"))
@@ -696,7 +697,6 @@ bot = telebot.TeleBot(TOKEN_TELEGRAM)
 caminho_csv = os.getenv('caminho_do_arquivo_dos_dados_de_agendamento')
 
 
-
 def ler_csv(caminho_csv):
     tarefas = []
 
@@ -719,7 +719,6 @@ def ler_csv(caminho_csv):
             tarefas.append(row)
 
     return tarefas
-
 
 
 def enviar_mensagem(texto):
@@ -733,21 +732,26 @@ def enviar_mensagem(texto):
             f"*CLIENTE*: _{tx['Cliente']}_\n\n"
             f"*ENDEREÇO*: _{tx['Endereço_']}_\n\n"
             f"*ANALISTA*: _{tx['Atendente']}_\n\n"
-            f"*OBS*: _{tx['Defeito Relatado']}_\n\n"            
+            f"*OBS*: _{tx['Defeito Relatado']}_\n\n"
             f"*DESCRIÇÃO*: _{tx['Descrição']}_\n\n"
             f"*TIPO*: _{tx['Modalidade']}_\n"
-            
+
         )
         print(msg)
         t.sleep(0.5)
-        
-        URL
 
-        bot.send_message(CHAT_ID_USER_EDER, msg,parse_mode="Markdown")
+        URL
         
-        
-        
+        CHAT_IDS = [
+        CHAT_ID_USER_EDER,
+        CHAT_ID_CORPORATIVO,
+        ]
+
+        for chat_id in CHAT_IDS:
+            bot.send_message(chat_id, msg, parse_mode="Markdown")
+
     return "\n".join(mensagens)
+
 
 tarefas = ler_csv(caminho_csv)
 enviar_mensagem(tarefas)
