@@ -665,7 +665,7 @@ bot = telebot.TeleBot(TOKEN_TELEGRAM)
 
 
 
-caminho_csv = 'D:\\Documentos\\EDER-LAPTOP-V1LI7TEI\\Programas\\automation_scheduling_visits\\dados_para_telegram.csv'
+caminho_csv = os.getenv('caminho_do_arquivo_dos_dados_de_agendamento')
 
 
 
