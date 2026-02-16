@@ -30,7 +30,6 @@ TOKEN_TELEGRAM = os.getenv("TOKEN")
 CHAT_ID_USER_EDER = os.getenv("CHAT_ID")  # ID do usuário  que vai receber
 
 
-
 print(os.path.exists("PC_OpenVPN.png"))
 g.press("WIN")
 t.sleep(0.5)
@@ -52,6 +51,7 @@ Função para verificar se a VPN já está conectada, utilizando uma imagem de r
 Se a VPN estiver conectada, a função chama a função de raspagem de dados.
 Caso contrário, ela inicia o processo de conexão. Caso a imagem de VPN conectada não seja encontrada, a função exibe uma mensagem de erro e aguarda um momento antes de prosseguir para a próxima etapa. A função é projetada para ser robusta, lidando com possíveis exceções relacionadas à localização da imagem na tela.
 """
+
 
 def vpn_conectada():
 
@@ -80,16 +80,16 @@ def vpn_conectada():
         t.sleep(1)
 
 
-# Encontra o icone do OpenVPN na bandeja e clica com o botão direito 
+# Encontra o icone do OpenVPN na bandeja e clica com o botão direito
 
-def get_bandeja_region(): 
+def get_bandeja_region():
 
     regiaoDaBandeja_loc = (1507, 902, 339, 100)
     # Localiza a imagem do ícone do OpenVPN na bandeja do sistema.
     try:
 
-        
-        img_PC_OpenVPN = g.locateOnScreen("PC_OpenVPN.png", grayscale=True, region=regiaoDaBandeja_loc, confidence=0.9)
+        img_PC_OpenVPN = g.locateOnScreen(
+            "PC_OpenVPN.png", grayscale=True, region=regiaoDaBandeja_loc, confidence=0.9)
         t.sleep(1)
         center = g.center(img_PC_OpenVPN)
         g.rightClick(center)
@@ -115,19 +115,22 @@ def clicar_em_escolher_backup():
     try:
 
         regiaoDoBotao_loc = (1156, 727, 684, 289)
-        PC_OpenVPN_Escolhendo_Backup = g.locateOnScreen('PC_OpenVPN_Escolhendo_Backup.png', region=regiaoDoBotao_loc, grayscale=True, confidence=0.9) # Localiza o icone de "Escolher o Backup""
+        PC_OpenVPN_Escolhendo_Backup = g.locateOnScreen(
+            # Localiza o icone de "Escolher o Backup""
+            'PC_OpenVPN_Escolhendo_Backup.png', region=regiaoDoBotao_loc, grayscale=True, confidence=0.9)
         center = g.center(PC_OpenVPN_Escolhendo_Backup)
         g.leftClick(center)
         t.sleep(1)
 
     except g.ImageNotFoundException as e:
-        
+
         # Caso de erro, onde o icone não foi encontrado, é exibido a mensagem abaixo
         print(f"Botão 'Escolher Backup' não encontrado. Verifique se a janela de seleção de backup está aberta e o botão é visível.")
-        t.sleep(7) # aguardamos 7 segundos para nova verificação
-        get_bandeja_region() # É exevutado a função que localiza o ícone do OpenVPN na bandeja, para tentar localizar o botão "Escolher Backup" novamente, caso seja encontrado, a função clicar_em_escolher_backup() é chamada para clicar no botão "Escolher Backup" e prosseguir com o processo de conexão.
+        t.sleep(7)  # aguardamos 7 segundos para nova verificação
+        get_bandeja_region()  # É exevutado a função que localiza o ícone do OpenVPN na bandeja, para tentar localizar o botão "Escolher Backup" novamente, caso seja encontrado, a função clicar_em_escolher_backup() é chamada para clicar no botão "Escolher Backup" e prosseguir com o processo de conexão.
         regiaoDoBotao_loc = (1156, 727, 684, 289)
-        PC_OpenVPN_Escolhendo_Backup = g.locateOnScreen('PC_OpenVPN_Escolhendo_Backup.png', region=regiaoDoBotao_loc, grayscale=True, confidence=0.9)
+        PC_OpenVPN_Escolhendo_Backup = g.locateOnScreen(
+            'PC_OpenVPN_Escolhendo_Backup.png', region=regiaoDoBotao_loc, grayscale=True, confidence=0.9)
         center = g.center(PC_OpenVPN_Escolhendo_Backup)
         g.leftClick(center)
         t.sleep(1)
@@ -143,12 +146,14 @@ Região aproximada do botão "Conectar"
 Função que por fim conecta a VPN
 """
 
+
 def clicar_em_conectar():
 
     try:
 
         botaoConectar_loc = (1156, 727, 684, 289)
-        botaoConectar = g.locateOnScreen('Conectar.png', grayscale=True, confidence=0.9)
+        botaoConectar = g.locateOnScreen(
+            'Conectar.png', grayscale=True, confidence=0.9)
         center = g.center(botaoConectar)
         g.leftClick(center)
         t.sleep(1)
@@ -169,7 +174,8 @@ A função tenta acessar a URL especificada, e em caso de erro de conexão, ela 
 Se a conexão for bem-sucedida, a função retorna True; caso contrário, após todas as tentativas, retorna False.
 """
 
-def acessar_pagina(page, tentativas=3, espera=8): 
+
+def acessar_pagina(page, tentativas=3, espera=8):
 
     for tentativa in range(1, tentativas + 1):
 
@@ -196,20 +202,25 @@ Função para realizar a raspagem de dados, utilizando o Playwright para automa�
 A função inclui esperas entre as ações para garantir que os elementos estejam carregados antes de interagir com eles, e utiliza tratamento de pop-ups e downloads para salvar os arquivos exportados.
 """
 
+
 def raspagem_de_dados():
 
     with sync_playwright() as p:
 
-        browser = p.chromium.launch(headless=False) # Inicia o navegador Chromium em modo não headless para permitir a visualização das ações realizadas durante a raspagem de dados.
-        context = browser.new_context(accept_downloads=True,) # Cria um novo contexto de navegador com a opção de aceitar downloads habilitada, permitindo que os arquivos exportados sejam baixados automaticamente durante a raspagem de dados.
+        # Inicia o navegador Chromium em modo não headless para permitir a visualização das ações realizadas durante a raspagem de dados.
+        browser = p.chromium.launch(headless=False)
+        # Cria um novo contexto de navegador com a opção de aceitar downloads habilitada, permitindo que os arquivos exportados sejam baixados automaticamente durante a raspagem de dados.
+        context = browser.new_context(accept_downloads=True,)
         t.sleep(1)
         page = context.new_page()
         t.sleep(6)
         acessar_pagina(page)
         t.sleep(2)
-        page.get_by_role("textbox", name="Login").fill(usuario) # Preenchendo o campo de login com a variável de ambiente "usuario" da minha .env\
+        page.get_by_role("textbox", name="Login").fill(
+            usuario)  # Preenchendo o campo de login com a variável de ambiente "usuario" da minha .env\
         t.sleep(1)
-        page.get_by_role("textbox", name="Senha").fill(senha) # Preenchendo o campo de senha com a variável de ambiente "senha" da minha .env
+        # Preenchendo o campo de senha com a variável de ambiente "senha" da minha .env
+        page.get_by_role("textbox", name="Senha").fill(senha)
         t.sleep(1)
         page.get_by_role("button", name="Entrar").click()
         print(page.title())
@@ -237,51 +248,54 @@ def raspagem_de_dados():
                 .content_frame.locator("#frameCentral")\
                 .content_frame.get_by_role("button", name="Exportar TXT").click()
 
-        page1 = page1_info.value # Acessa o pop-up de exportação
-        
-        
+        page1 = page1_info.value  # Acessa o pop-up de exportação
+
         # Aguarda o download ser iniciado após clicar no link de exportação, e salva o arquivo baixado com um nome específico na pasta atual do script.
         with page1.expect_download() as download_info:
             page1.get_by_role(
                 "link",
-                name=re.compile(r"^FUPOrdemDeServicos_") # O nome do arquivo de exportação pode variar, então usamos uma expressão regular para corresponder ao padrão do nome do arquivo, que começa com "FUPOrdemDeServicos_" seguido por outros caracteres.
+                # O nome do arquivo de exportação pode variar, então usamos uma expressão regular para corresponder ao padrão do nome do arquivo, que começa com "FUPOrdemDeServicos_" seguido por outros caracteres.
+                name=re.compile(r"^FUPOrdemDeServicos_")
             ).click()
 
         download = download_info.value
-        caminho_arquivo = os.path.join(os.getcwd(), "ordem_de_servico.csv") # Define o caminho completo para salvar o arquivo baixado, usando o diretório atual do script e o nome "ordem_de_servico.csv"
+        # Define o caminho completo para salvar o arquivo baixado, usando o diretório atual do script e o nome "ordem_de_servico.csv"
+        caminho_arquivo = os.path.join(os.getcwd(), "ordem_de_servico.csv")
         print(caminho_arquivo)
         download.save_as(f"{caminho_arquivo}")
 
         t.sleep(1)
-        browser.close() # Fecha o navegador após a conclusão da raspagem de dados
-
-try:
-    
-    get_bandeja_region() # Localiza o ícone do OpenVPN na bandeja e clica com o botão direito para acessar as opções de conexão
-except g.ImageNotFoundException as e:
-    pass
-
-
-
+        browser.close()  # Fecha o navegador após a conclusão da raspagem de dados
 
 
 try:
-    
-    clicar_em_escolher_backup() # Clica no botão "Escolher Backup" para abrir a janela de seleção de backup, e em caso de erro, tenta localizar o botão novamente após aguardar um tempo.
+
+    # Localiza o ícone do OpenVPN na bandeja e clica com o botão direito para acessar as opções de conexão
+    get_bandeja_region()
 except g.ImageNotFoundException as e:
     pass
 
 
 try:
-    
-    clicar_em_conectar() # Clica no botão "Conectar" para iniciar a conexão VPN, e em caso de erro, exibe uma mensagem indicando que o botão não foi encontrado.
+
+    # Clica no botão "Escolher Backup" para abrir a janela de seleção de backup, e em caso de erro, tenta localizar o botão novamente após aguardar um tempo.
+    clicar_em_escolher_backup()
 except g.ImageNotFoundException as e:
     pass
 
 
 try:
-    
-    raspagem_de_dados() # Realiza a raspagem de dados utilizando o Playwright para automação de navegador, com etapas para acessar a página, fazer login, navegar pelos frames e realizar ações para buscar e exportar os dados necessários, incluindo tratamento de pop-ups e downloads.
+
+    # Clica no botão "Conectar" para iniciar a conexão VPN, e em caso de erro, exibe uma mensagem indicando que o botão não foi encontrado.
+    clicar_em_conectar()
+except g.ImageNotFoundException as e:
+    pass
+
+
+try:
+
+    # Realiza a raspagem de dados utilizando o Playwright para automação de navegador, com etapas para acessar a página, fazer login, navegar pelos frames e realizar ações para buscar e exportar os dados necessários, incluindo tratamento de pop-ups e downloads.
+    raspagem_de_dados()
 except Error as e:
     pass
 
@@ -409,10 +423,11 @@ substituicoes = {
     r'[.,°ºª_\*":\\\-]': ' '
 }
 
-# Função para substituir as abreviações e caracteres especiais no texto, 
-# utilizando o dicionário de substituições definido acima. 
-# A função percorre cada padrão e substituição no dicionário, 
+# Função para substituir as abreviações e caracteres especiais no texto,
+# utilizando o dicionário de substituições definido acima.
+# A função percorre cada padrão e substituição no dicionário,
 # aplicando as substituições ao texto usando expressões regulares, e retorna o texto modificado.
+
 
 def substituir_abreviacoes(texto):
     for padrao, substituto in substituicoes.items():
@@ -426,7 +441,7 @@ def inserir_virgula(texto):
     return re.sub(r'(\D)\s+(\d{1,6}\b)', r'\1, \2', str(texto))
 
 
-# criação de colunas para meses e dias da semana em português, 
+# criação de colunas para meses e dias da semana em português,
 # utilizando dicionários para mapear os nomes dos meses e dias da semana em inglês para suas equivalentes em português.
 mesespt = {
     'January': 'Janeiro',
@@ -474,16 +489,24 @@ dados = []  # criando novos dados a partir da leitura e quebras de linhas, excet
 
 
 # Leitura do arquivo
-with open(file=f'{nome_do_arquivo}', mode='r', encoding='1252') as arquivo: # Abrindo o arquivo CSV exportado, utilizando a codificação '1252' para garantir a leitura correta dos caracteres acentuados e especiais presentes no arquivo, e criando um objeto de arquivo para leitura.
-    linha = arquivo.readline()  # Lê a primeira linha do arquivo, que geralmente contém os cabeçalhos das colunas, e armazena na variável 'linha' para iniciar o processo de leitura dos dados.
-    linha = arquivo.readline()  # Lê a segunda linha do arquivo, que é a primeira linha de dados, e armazena na variável 'linha' para iniciar o processo de leitura dos dados. A leitura continua dentro do loop while até que todas as linhas sejam processadas.
-    while linha.upper(): # Enquanto a linha lida for diferente de uma string vazia (indicando que ainda há dados para ler), o loop continua a processar cada linha do arquivo e coloca as letras em maiúsculo para garantir a consistência no tratamento dos dados, especialmente para a aplicação de expressões regulares e substituições.
-        quebra_linha = linha.strip().split(sep=';')# Remove os espaços em branco no início e no final da linha, e depois divide a linha em uma lista de valores usando o ponto e vírgula como separador, armazenando o resultado na variável 'quebra_linha' para acessar os dados de cada coluna individualmente.
-        nova_linha = quebra_linha[12].upper()# Acessa o valor da coluna de interesse (neste caso, a coluna 12, que é a "Descrição") e converte o texto para maiúsculo para garantir a consistência no tratamento dos dados, especialmente para a aplicação de expressões regulares e substituições.
+# Abrindo o arquivo CSV exportado, utilizando a codificação '1252' para garantir a leitura correta dos caracteres acentuados e especiais presentes no arquivo, e criando um objeto de arquivo para leitura.
+with open(file=f'{nome_do_arquivo}', mode='r', encoding='1252') as arquivo:
+    # Lê a primeira linha do arquivo, que geralmente contém os cabeçalhos das colunas, e armazena na variável 'linha' para iniciar o processo de leitura dos dados.
+    linha = arquivo.readline()
+    # Lê a segunda linha do arquivo, que é a primeira linha de dados, e armazena na variável 'linha' para iniciar o processo de leitura dos dados. A leitura continua dentro do loop while até que todas as linhas sejam processadas.
+    linha = arquivo.readline()
+    while linha.upper():  # Enquanto a linha lida for diferente de uma string vazia (indicando que ainda há dados para ler), o loop continua a processar cada linha do arquivo e coloca as letras em maiúsculo para garantir a consistência no tratamento dos dados, especialmente para a aplicação de expressões regulares e substituições.
+        # Remove os espaços em branco no início e no final da linha, e depois divide a linha em uma lista de valores usando o ponto e vírgula como separador, armazenando o resultado na variável 'quebra_linha' para acessar os dados de cada coluna individualmente.
+        quebra_linha = linha.strip().split(sep=';')
+        # Acessa o valor da coluna de interesse (neste caso, a coluna 12, que é a "Descrição") e converte o texto para maiúsculo para garantir a consistência no tratamento dos dados, especialmente para a aplicação de expressões regulares e substituições.
+        nova_linha = quebra_linha[12].upper()
         nova_linha = substituir_abreviacoes(nova_linha)  # Aplica os replaces
-        dados.append(nova_linha) # Adiciona a nova linha processada à lista de dados, que será utilizada posteriormente para criar o dataframe e realizar análises adicionais.
-        coluna_descricao.append(nova_linha)# Adiciona a nova linha processada à lista 'coluna_descricao', que é uma lista separada para armazenar os valores da coluna de descrição, facilitando o tratamento específico dessa coluna com expressões regulares para extração de endereços e outras informações relevantes.
-        linha = arquivo.readline()# Lê a próxima linha do arquivo para continuar o processo de leitura e tratamento dos dados, repetindo o loop até que todas as linhas sejam processadas.
+        # Adiciona a nova linha processada à lista de dados, que será utilizada posteriormente para criar o dataframe e realizar análises adicionais.
+        dados.append(nova_linha)
+        # Adiciona a nova linha processada à lista 'coluna_descricao', que é uma lista separada para armazenar os valores da coluna de descrição, facilitando o tratamento específico dessa coluna com expressões regulares para extração de endereços e outras informações relevantes.
+        coluna_descricao.append(nova_linha)
+        # Lê a próxima linha do arquivo para continuar o processo de leitura e tratamento dos dados, repetindo o loop até que todas as linhas sejam processadas.
+        linha = arquivo.readline()
 
 # ____________________________________________________________________________________________________________________
 """
@@ -520,7 +543,7 @@ for texto in coluna_descricao:  # OBS: iteração na nossa lista extraída do do
     match_bloco = regex_endereco_bloco.search(texto)
 
     if match_bloco:
-        
+
         # salva os dados na variavel, o '.group()' faz com que apenas os valores sejam salvos e não o objeto
         data = match_bloco.group()
         # salva os dados encontrados no padrão regex na nossa lista lista
@@ -530,14 +553,14 @@ for texto in coluna_descricao:  # OBS: iteração na nossa lista extraída do do
         match_endereco = regex_endereco.search(texto)
 
         if match_endereco:
-            
+
             # salva os dados na variavel, o '.group()' faz com que apenas os valores sejam salvos e não o objeto
             data = match_endereco.group()
             # salva os dados encontrados no padrão regex na nossa lista lista
             lista.append(data)
 
         else:
-           
+
             erro = texto  # caso não seja encontrado os valores pelo regex, essa etapa retorna o mesmo valor do campo na coluna alvo
             # salva os dados na nossa lista de valores NÃO encontrados, ou seja, o mesmo valor de origem.
             lista.append(erro)
@@ -598,7 +621,7 @@ new_list = []
 
 # biblioteca para manipulação de dados, utilizada para criar e manipular dataframes, facilitando a organização e análise dos dados extraídos
 texto = "SEGUNDO VALIDAÇÃO NOS TEXTO, APLICANDO UM REGEX MAIS ABRANGENTE PARA CAPTURAR PADRÕES DE ENDEREÇO COMUM EM SÃO PAULO, MESMO QUE ESTEJAM ENTRE POSSÍVEIS NOMES DE ENDEREÇO OU OUTROS ELEMENTOS DE TEXTO. O REGEX FOI PROJETADO PARA SER FLEXÍVEL, PERMITINDO VARIAÇÕES NA FORMA COMO OS ENDEREÇOS SÃO ESCRITOS, INCLUINDO POSSÍVEIS ABREVIAÇÕES E DIFERENTES FORMATAÇÕES. O OBJETIVO É GARANTIR QUE OS ENDEREÇOS SEJAM EXTRAÍDOS CORRETAMENTE, MESMO QUE ESTEJAM EMBUTIDOS EM OUTROS TEXTOS OU TENHAM FORMATAÇÕES INCONSISTENTES."
-texto = texto.islower() #
+texto = texto.islower()
 print(texto)
 logradouros = r"(RUA|AVENIDA|ALAMEDA|ESTRADA|RODOVIA|TRAVESSA|PRAÇA|VIADUTO|PARQUE|VILA|PONTE|CALÇADA)"
 
@@ -631,9 +654,12 @@ for texto in old_list:
 ###
 ###
 df['Endereço_'] = new_list
-df['Endereço_'] = df['Endereço_'].apply(inserir_virgula) # Aplicando a função para inserir uma vírgula entre o nome do logradouro e o número do endereço, utilizando uma expressão regular para identificar o padrão de logradouro seguido por um número, e substituindo por uma vírgula para facilitar a leitura e análise dos endereços extraídos.
-df["São Paulo"] = " - SÃO PAULO"                        # Criando uma nova coluna "São Paulo" com o valor fixo " - SÃO PAULO" para ser concatenada posteriormente com a coluna "Endereço_", adicionando a informação de localização aos endereços extraídos, facilitando a identificação de que os endereços estão localizados em São Paulo, e melhorando a clareza dos dados para análises futuras.
-df["Endereço_"] = df["Endereço_"] + df["São Paulo"] # Concatenando a coluna "Endereço_" com a string " - SÃO PAULO" para adicionar a informação de localização aos endereços extraídos, facilitando a identificação de que os endereços estão localizados em São Paulo, e melhorando a clareza dos dados para análises futuras.
+# Aplicando a função para inserir uma vírgula entre o nome do logradouro e o número do endereço, utilizando uma expressão regular para identificar o padrão de logradouro seguido por um número, e substituindo por uma vírgula para facilitar a leitura e análise dos endereços extraídos.
+df['Endereço_'] = df['Endereço_'].apply(inserir_virgula)
+# Criando uma nova coluna "São Paulo" com o valor fixo " - SÃO PAULO" para ser concatenada posteriormente com a coluna "Endereço_", adicionando a informação de localização aos endereços extraídos, facilitando a identificação de que os endereços estão localizados em São Paulo, e melhorando a clareza dos dados para análises futuras.
+df["São Paulo"] = " - SÃO PAULO"
+# Concatenando a coluna "Endereço_" com a string " - SÃO PAULO" para adicionar a informação de localização aos endereços extraídos, facilitando a identificação de que os endereços estão localizados em São Paulo, e melhorando a clareza dos dados para análises futuras.
+df["Endereço_"] = df["Endereço_"] + df["São Paulo"]
 ###
 ###
 # _____________________________
@@ -648,21 +674,23 @@ df['base_Data_da_visita'] = pd.to_datetime(
 )
 
 # Criando colunas para dia da semana e mês em português, utilizando os dicionários de mapeamento definidos anteriormente para traduzir os nomes dos dias da semana e meses do inglês para o português, facilitando a análise temporal dos dados extraídos.
-df['Dia da semana'] = df['base_Data_da_visita'].dt.day_name().replace(diaspt) # Criando uma nova coluna "Dia da semana" a partir da coluna "base_Data_da_visita", utilizando o método dt.day_name() para extrair o nome do dia da semana em inglês, e depois aplicando o método replace() com o dicionário de mapeamento "diaspt" para traduzir os nomes dos dias da semana do inglês para o português, facilitando a análise temporal dos dados extraídos.
-df['Mes'] = df['base_Data_da_visita'].dt.month_name().replace(mesespt) # Criando uma nova coluna "Mes" a partir da coluna "base_Data_da_visita", utilizando o método dt.month_name() para extrair o nome do mês em inglês, e depois aplicando o método replace() com o dicionário de mapeamento "mesespt" para traduzir os nomes dos meses do inglês para o português, facilitando a análise temporal dos dados extraídos.
-df['Dia da semana'] = df['base_Data_da_visita'].dt.day_name().replace(diaspt) # Criando uma nova coluna "Dia da semana" a partir da coluna "base_Data_da_visita", utilizando o método dt.day_name() para extrair o nome do dia da semana em inglês, e depois aplicando o método replace() com o dicionário de mapeamento "diaspt" para traduzir os nomes dos dias da semana do inglês para o português, facilitando a análise temporal dos dados extraídos.
+# Criando uma nova coluna "Dia da semana" a partir da coluna "base_Data_da_visita", utilizando o método dt.day_name() para extrair o nome do dia da semana em inglês, e depois aplicando o método replace() com o dicionário de mapeamento "diaspt" para traduzir os nomes dos dias da semana do inglês para o português, facilitando a análise temporal dos dados extraídos.
+df['Dia da semana'] = df['base_Data_da_visita'].dt.day_name().replace(diaspt)
+# Criando uma nova coluna "Mes" a partir da coluna "base_Data_da_visita", utilizando o método dt.month_name() para extrair o nome do mês em inglês, e depois aplicando o método replace() com o dicionário de mapeamento "mesespt" para traduzir os nomes dos meses do inglês para o português, facilitando a análise temporal dos dados extraídos.
+df['Mes'] = df['base_Data_da_visita'].dt.month_name().replace(mesespt)
+# Criando uma nova coluna "Dia da semana" a partir da coluna "base_Data_da_visita", utilizando o método dt.day_name() para extrair o nome do dia da semana em inglês, e depois aplicando o método replace() com o dicionário de mapeamento "diaspt" para traduzir os nomes dos dias da semana do inglês para o português, facilitando a análise temporal dos dados extraídos.
+df['Dia da semana'] = df['base_Data_da_visita'].dt.day_name().replace(diaspt)
 
 
 # Os dados abaixo seram enviados ao telegram
 df_telegtam = df[['Dia da semana', 'Dt Comprometida', 'Cliente',
                   'Endereço_', 'Atendente', 'Defeito Relatado', 'Descrição', 'Modalidade']]
 
-df_telegtam.to_csv('dados_para_telegram.csv',sep=";",index=False, encoding='utf-8-sig')
-
+df_telegtam.to_csv('dados_para_telegram.csv', sep=";",
+                   index=False, encoding='utf-8-sig')
 
 
 bot = telebot.TeleBot(TOKEN_TELEGRAM)
-
 
 
 caminho_csv = os.getenv('caminho_do_arquivo_dos_dados_de_agendamento')
@@ -681,55 +709,48 @@ def ler_csv(caminho_csv):
     return tarefas
 
 
+def ler_csv(caminho_csv):
+    tarefas = []
 
-def formatar_tarefas(tarefas):
-    mensagens = []
-    for t in tarefas:
-        print(t)  
-        
-        msg = (
-            f"Dia da semana: {t['\ufeffDia da semana']}\n"
-            f"Dt Comprometida: {t['Dt Comprometida']}\n"
-            f"Cliente: {t['Cliente']}\n"
-            f"Endereço: {t['Endereço_']}\n"
-            f"Atendente: {t['Atendente']}\n"
-            f"Defeito Relatado: {t['Defeito Relatado']}\n"
-            f"Descrição: {t['Descrição']}\n"
-            f"Modalidade: {t['Modalidade']}\n"
-            "_____"
-        )
-        
-        mensagens.append(msg)
-    return "\n".join(mensagens)
+    with open(caminho_csv, mode="r", encoding="utf-8", newline="") as arquivo:
+        leitor = csv.DictReader(arquivo, delimiter=";")
 
+        for row in leitor:
+            tarefas.append(row)
 
+    return tarefas
 
-def dividir_mensagem(texto, limite=2000):
-    partes = []
-    
-    while len(texto) > limite:
-        parte = texto[:limite]
-        
-        # tenta quebrar na última quebra de linha
-        ultimo_enter = parte.rfind("\n")
-        if ultimo_enter != -1:
-            parte = texto[:ultimo_enter]
-        
-        partes.append(parte)
-        texto = texto[len(parte):]
-    
-    partes.append(texto) 
-    return partes
 
 
 def enviar_mensagem(texto):
-    dividir_mensagem(texto)
-    bot = telebot.TeleBot(TOKEN_TELEGRAM)
-    bot.send_message(CHAT_ID_USER_EDER, texto)
 
+    mensagens = []
+    for tx in texto:
 
+        msg = (
+            f"*DIA*: _{tx['\ufeffDia da semana']}_\n\n"
+            f"*DATA DA VISITA*: _{tx['Dt Comprometida']}_\n"
+            f"*CLIENTE*: _{tx['Cliente']}_\n\n"
+            f"*ENDEREÇO*: _{tx['Endereço_']}_\n\n"
+            f"*ANALISTA*: _{tx['Atendente']}_\n\n"
+            f"*OBS*: _{tx['Defeito Relatado']}_\n\n"            
+            f"*DESCRIÇÃO*: _{tx['Descrição']}_\n\n"
+            f"*TIPO*: _{tx['Modalidade']}_\n"
+            
+        )
+        print(msg)
+        t.sleep(0.5)
+        
+        URL
 
+        bot.send_message(CHAT_ID_USER_EDER, msg,parse_mode="Markdown")
+        
+        
+        
+    return "\n".join(mensagens)
 
 tarefas = ler_csv(caminho_csv)
-texto = formatar_tarefas(tarefas)
-enviar_mensagem(texto)
+enviar_mensagem(tarefas)
+
+tarefas = ler_csv(caminho_csv)
+enviar_mensagem(tarefas)
