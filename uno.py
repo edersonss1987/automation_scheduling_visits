@@ -9,6 +9,9 @@ import re             # biblioteca para expressões regulares, utilizada para cr
 import os             # biblioteca para manipulação de arquivos e diretórios, utilizada para salvar os arquivos baixados e acessar variáveis de ambiente
 import pandas as pd   # biblioteca para manipulação de dados, utilizada para criar e manipular dataframes, facilitando a organização e análise dos dados extraídos
 
+import csv
+import telebot
+import requests as r
 
 from playwright.sync_api import sync_playwright, Page, Error, expect
 from dotenv import load_dotenv
@@ -22,6 +25,11 @@ usuario = os.getenv("UNO_USER")
 senha = os.getenv("UNO_PASSWORD")
 # import da variável de ambiente para a URL, armazenada no arquivo .env
 URL = os.getenv("URL")
+
+TOKEN_TELEGRAM = os.getenv("TOKEN")
+CHAT_ID_USER_EDER = os.getenv("CHAT_ID")  # ID do usuário  que vai receber
+
+
 
 print(os.path.exists("PC_OpenVPN.png"))
 g.press("WIN")
@@ -647,7 +655,81 @@ df['Dia da semana'] = df['base_Data_da_visita'].dt.day_name().replace(diaspt) # 
 
 # Os dados abaixo seram enviados ao telegram
 df_telegtam = df[['Dia da semana', 'Dt Comprometida', 'Cliente',
-                  'Endereço', 'Atendente', 'Defeito Relatado', 'Descrição', 'Modalidade']]
+                  'Endereço_', 'Atendente', 'Defeito Relatado', 'Descrição', 'Modalidade']]
 
-df_telegtam.to_csv('dados_para_telegram.csv',
-                   index=False, encoding='utf-8-sig')
+df_telegtam.to_csv('dados_para_telegram.csv',sep=";",index=False, encoding='utf-8-sig')
+
+
+
+bot = telebot.TeleBot(TOKEN_TELEGRAM)
+
+
+
+caminho_csv = 'D:\\Documentos\\EDER-LAPTOP-V1LI7TEI\\Programas\\automation_scheduling_visits\\dados_para_telegram.csv'
+
+
+
+def ler_csv(caminho_csv):
+    tarefas = []
+
+    with open(caminho_csv, mode="r", encoding="utf-8", newline="") as arquivo:
+        leitor = csv.DictReader(arquivo, delimiter=";")
+
+        for row in leitor:
+            tarefas.append(row)
+
+    return tarefas
+
+
+
+def formatar_tarefas(tarefas):
+    mensagens = []
+    for t in tarefas:
+        print(t)  
+        
+        msg = (
+            f"Dia da semana: {t['\ufeffDia da semana']}\n"
+            f"Dt Comprometida: {t['Dt Comprometida']}\n"
+            f"Cliente: {t['Cliente']}\n"
+            f"Endereço: {t['Endereço_']}\n"
+            f"Atendente: {t['Atendente']}\n"
+            f"Defeito Relatado: {t['Defeito Relatado']}\n"
+            f"Descrição: {t['Descrição']}\n"
+            f"Modalidade: {t['Modalidade']}\n"
+            "_____"
+        )
+        
+        mensagens.append(msg)
+    return "\n".join(mensagens)
+
+
+
+def dividir_mensagem(texto, limite=2000):
+    partes = []
+    
+    while len(texto) > limite:
+        parte = texto[:limite]
+        
+        # tenta quebrar na última quebra de linha
+        ultimo_enter = parte.rfind("\n")
+        if ultimo_enter != -1:
+            parte = texto[:ultimo_enter]
+        
+        partes.append(parte)
+        texto = texto[len(parte):]
+    
+    partes.append(texto) 
+    return partes
+
+
+def enviar_mensagem(texto):
+    dividir_mensagem(texto)
+    bot = telebot.TeleBot(TOKEN_TELEGRAM)
+    bot.send_message(CHAT_ID_USER_EDER, texto)
+
+
+
+
+tarefas = ler_csv(caminho_csv)
+texto = formatar_tarefas(tarefas)
+enviar_mensagem(texto)
