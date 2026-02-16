@@ -27,8 +27,10 @@ senha = os.getenv("UNO_PASSWORD")
 URL = os.getenv("URL")
 
 TOKEN_TELEGRAM = os.getenv("TOKEN")
-CHAT_ID_USER_EDER = os.getenv("CHAT_ID_PESSOAL")  # ID do usuário  que vai receber
-CHAT_ID_CORPORATIVO = os.getenv("CHAT_ID_CORPORATIVO")  # ID do grupo corporativo
+# ID do usuário  que vai receber
+CHAT_ID_USER_EDER = os.getenv("CHAT_ID_PESSOAL")
+CHAT_ID_CORPORATIVO = os.getenv(
+    "CHAT_ID_CORPORATIVO")  # ID do grupo corporativo
 
 
 print(os.path.exists("PC_OpenVPN.png"))
@@ -741,10 +743,10 @@ def enviar_mensagem(texto):
         t.sleep(0.5)
 
         URL
-        
+
         CHAT_IDS = [
-        CHAT_ID_USER_EDER,
-        CHAT_ID_CORPORATIVO,
+            CHAT_ID_USER_EDER,
+            CHAT_ID_CORPORATIVO,
         ]
 
         for chat_id in CHAT_IDS:
