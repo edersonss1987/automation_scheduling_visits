@@ -29,11 +29,9 @@ URL = os.getenv("URL")
 TOKEN_TELEGRAM = os.getenv("TOKEN")
 # ID do usuário  que vai receber
 CHAT_ID_USER_EDER = os.getenv("CHAT_ID_PESSOAL")
-CHAT_ID_CORPORATIVO = os.getenv(
-    "CHAT_ID_CORPORATIVO")  # ID do grupo corporativo
+CHAT_ID_CORPORATIVO = os.getenv("CHAT_ID_CORPORATIVO")  # ID do grupo corporativo
 
 
-print(os.path.exists("PC_OpenVPN.png"))
 g.press("WIN")
 t.sleep(0.5)
 # Digitando "OpenVPN GUI" para buscar o aplicativo no menu iniciar
@@ -43,11 +41,9 @@ g.press("ENTER")
 t.sleep(0.5)
 # Atalho para acessar a barra de tarefas, onde o ícone do OpenVPN GUI deve estar localizado
 g.hotkey('win', 'b')
-t.sleep(0.5)
+t.sleep(1.5)
 g.press("ENTER")
-
-
-t.sleep(0.5)
+t.sleep(1)
 
 """
 Função para verificar se a VPN já está conectada, utilizando uma imagem de referência para identificar o status da conexão.
@@ -56,7 +52,15 @@ Caso contrário, ela inicia o processo de conexão. Caso a imagem de VPN conecta
 """
 
 
-def vpn_conectada():
+# Função para verificar se a VPN já está conectada, 
+# utilizando uma imagem de referência para identificar o status da conexão. 
+# Se a VPN estiver conectada, a função chama a função de raspagem de dados. 
+# Caso contrário, ela inicia o processo de conexão. 
+# Caso a imagem de VPN conectada não seja encontrada, a função exibe uma mensagem de erro e aguarda um momento antes de prosseguir para a próxima etapa. 
+# A função é projetada para ser robusta, lidando com possíveis exceções relacionadas à localização da imagem na tela.
+
+
+def vpn_conectada():    
 
     regiao_de_cenexao_da_vpn_loc = _loc = (1156, 727, 684, 289)
 
@@ -87,6 +91,8 @@ def vpn_conectada():
 
 def get_bandeja_region():
 
+    t.sleep(8)
+
     regiaoDaBandeja_loc = (1507, 902, 339, 100)
     # Localiza a imagem do ícone do OpenVPN na bandeja do sistema.
     try:
@@ -97,6 +103,8 @@ def get_bandeja_region():
         center = g.center(img_PC_OpenVPN)
         g.rightClick(center)
         t.sleep(1)
+        clicar_em_escolher_backup()
+        clicar_em_conectar()
 
     except g.ImageNotFoundException as e:  # Caso seja exibida a mensagem de erro
 
@@ -124,6 +132,7 @@ def clicar_em_escolher_backup():
         center = g.center(PC_OpenVPN_Escolhendo_Backup)
         g.leftClick(center)
         t.sleep(1)
+        clicar_em_conectar()
 
     except g.ImageNotFoundException as e:
 
@@ -226,7 +235,7 @@ def raspagem_de_dados():
         page.get_by_role("textbox", name="Senha").fill(senha)
         t.sleep(1)
         page.get_by_role("button", name="Entrar").click()
-        print(page.title())
+        t.sleep(1)
         page.locator("iframe[name=\"UCommerceManagerSession\"]").content_frame.locator(
             "#frameMenu").content_frame.get_by_text("SERVIÇOS").click()
         t.sleep(1)
@@ -260,43 +269,28 @@ def raspagem_de_dados():
                 # O nome do arquivo de exportação pode variar, então usamos uma expressão regular para corresponder ao padrão do nome do arquivo, que começa com "FUPOrdemDeServicos_" seguido por outros caracteres.
                 name=re.compile(r"^FUPOrdemDeServicos_")
             ).click()
-
+        # Acessa o objeto de download para obter informações sobre o arquivo baixado, como o nome do arquivo e o caminho temporário onde ele foi salvo.
         download = download_info.value
+
         # Define o caminho completo para salvar o arquivo baixado, usando o diretório atual do script e o nome "ordem_de_servico.csv"
         caminho_arquivo = os.path.join(os.getcwd(), "ordem_de_servico.csv")
-        print(caminho_arquivo)
-        download.save_as(f"{caminho_arquivo}")
 
+        # Salva o arquivo baixado com o nome especificado no caminho definido, garantindo que o arquivo seja salvo corretamente para posterior leitura e tratamento dos dados.
+        download.save_as(f"{caminho_arquivo}")
         t.sleep(1)
         browser.close()  # Fecha o navegador após a conclusão da raspagem de dados
 
 
 try:
-
-    # Localiza o ícone do OpenVPN na bandeja e clica com o botão direito para acessar as opções de conexão
+    t.sleep(1)
     get_bandeja_region()
-except g.ImageNotFoundException as e:
+    
+except Error as e:
     pass
 
 
 try:
-
-    # Clica no botão "Escolher Backup" para abrir a janela de seleção de backup, e em caso de erro, tenta localizar o botão novamente após aguardar um tempo.
-    clicar_em_escolher_backup()
-except g.ImageNotFoundException as e:
-    pass
-
-
-try:
-
-    # Clica no botão "Conectar" para iniciar a conexão VPN, e em caso de erro, exibe uma mensagem indicando que o botão não foi encontrado.
-    clicar_em_conectar()
-except g.ImageNotFoundException as e:
-    pass
-
-
-try:
-
+    t.sleep(1)
     # Realiza a raspagem de dados utilizando o Playwright para automação de navegador, com etapas para acessar a página, fazer login, navegar pelos frames e realizar ações para buscar e exportar os dados necessários, incluindo tratamento de pop-ups e downloads.
     raspagem_de_dados()
 except Error as e:
@@ -707,8 +701,13 @@ depois_de_amanha = depois_de_amanha.strftime('%d/%m/%Y')
 quatro_dias_a_frente = quatro_dias_a_frente.strftime('%d/%m/%Y')
 
 
-# aplicando o filtro para seleção dos dados com data de visita igual a data atual ou futura
+# aplicando o filtro para seleção dos dados com data de visita igual a data atual e futura ou seja, vistas de "hoje em diante"."
 df_telegram = df.loc[df['Dt Comprometida'] >= hoje]
+
+# criado uma condição, para verificar se o dia da semana atual é sexta-feira (4), e caso seja,
+# o filtro seleciona as visitas com data de visita entre hoje e quatro dias à frente "Segunda-feira" , para incluir as visitas de segunda-feira,
+# já que as visitas de sábado e domingo não são consideradas.
+# Caso contrário, o filtro seleciona as visitas com data de visita entre "hoje e amanhã" a intenção é sempre receber as visitas de no max dois dias.
 
 if my_day_number == 4:  # 4 = Sexta-feira
 
@@ -721,7 +720,7 @@ else:
 
     visitas = df_telegram.loc[
         (df_telegram['Dt Comprometida'] >= hoje) &
-        (df_telegram['Dt Comprometida'] <= depois_de_amanha)
+        (df_telegram['Dt Comprometida'] <= amanha)
     ]
     print("ESTAMOS ENCAMINHANDO AS VISITAS DE HOJE E AMANHÃ")
 
@@ -738,6 +737,7 @@ bot = telebot.TeleBot(TOKEN_TELEGRAM)
 caminho_csv = os.getenv('caminho_do_arquivo_dos_dados_de_agendamento')
 
 
+# função de leitura do CSV
 def ler_csv(caminho_csv):
     tarefas = []
 
@@ -750,22 +750,14 @@ def ler_csv(caminho_csv):
     return tarefas
 
 
-def ler_csv(caminho_csv):
-    tarefas = []
-
-    with open(caminho_csv, mode="r", encoding="utf-8", newline="") as arquivo:
-        leitor = csv.DictReader(arquivo, delimiter=";")
-
-        for row in leitor:
-            tarefas.append(row)
-
-    return tarefas
-
-
+# função de tratamento dos dados, responsavel por formatar as mensagens de forma organizada
 def enviar_mensagem(texto):
 
     mensagens = []
     for tx in texto:
+
+        # O asterisco (*) é usado para formatar o texto em negrito,
+        # e o sublinhado (_) é usado para formatar o texto em itálico, seguindo a sintaxe de formatação do Telegram para mensagens em Markdown.
 
         msg = (
             f"*DIA*: _{tx['\ufeffDia da semana']}_\n\n"
@@ -778,7 +770,7 @@ def enviar_mensagem(texto):
             f"*TIPO*: _{tx['Modalidade']}_\n"
 
         )
-        print(msg)
+
         t.sleep(0.5)
 
         URL
@@ -799,3 +791,5 @@ enviar_mensagem(tarefas)
 
 tarefas = ler_csv(caminho_csv)
 enviar_mensagem(tarefas)
+
+print("MENSAGENS ENVIADAS COM SUCESSO AO TELEGRAM!")
