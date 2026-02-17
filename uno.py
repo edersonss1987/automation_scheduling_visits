@@ -684,18 +684,57 @@ df['Mes'] = df['base_Data_da_visita'].dt.month_name().replace(mesespt)
 # Criando uma nova coluna "Dia da semana" a partir da coluna "base_Data_da_visita", utilizando o método dt.day_name() para extrair o nome do dia da semana em inglês, e depois aplicando o método replace() com o dicionário de mapeamento "diaspt" para traduzir os nomes dos dias da semana do inglês para o português, facilitando a análise temporal dos dados extraídos.
 df['Dia da semana'] = df['base_Data_da_visita'].dt.day_name().replace(diaspt)
 
+# capturando a data de hoje
+hoje = pd.to_datetime('today')
+
+# Criando uma nova  variavel, método dt.weekday() para extrair o número do dia da semana (0 para segunda-feira, 1 para terça-feira, etc.)
+my_day_number = hoje.weekday()
+
+# Criando uma nova variavel, já aplicando o método de calculo do dia+1
+amanha = hoje + pd.Timedelta(days=1)
+
+# Criando uma nova variavel, já aplicando o método de calculo do dia+2
+depois_de_amanha = hoje + pd.Timedelta(days=2)
+
+# Criando uma nova variavel, já aplicando o método de calculo do dia+3, esse metodo nós aplicaremos nas sextas-feiras
+quatro_dias_a_frente = hoje + pd.Timedelta(days=3)
+
+
+# formatando com .strftime('%d/%m/%Y') para data no modelo brasileiro dd/mm/aaaa
+hoje = hoje.strftime('%d/%m/%Y')
+amanha = amanha.strftime('%d/%m/%Y')
+depois_de_amanha = depois_de_amanha.strftime('%d/%m/%Y')
+quatro_dias_a_frente = quatro_dias_a_frente.strftime('%d/%m/%Y')
+
+
+# aplicando o filtro para seleção dos dados com data de visita igual a data atual ou futura
+df_telegram = df.loc[df['Dt Comprometida'] >= hoje]
+
+if my_day_number == 4:  # 4 = Sexta-feira
+
+    visitas = df_telegram.loc[
+        (df_telegram['Dt Comprometida'] >= hoje) &
+        (df_telegram['Dt Comprometida'] <= quatro_dias_a_frente)]
+    print("ESTAMOS ENCAMINHANDO AS VISITAS DE HOJE E DE SEGUNDA-FEIRA")
+
+else:
+
+    visitas = df_telegram.loc[
+        (df_telegram['Dt Comprometida'] >= hoje) &
+        (df_telegram['Dt Comprometida'] <= depois_de_amanha)
+    ]
+    print("ESTAMOS ENCAMINHANDO AS VISITAS DE HOJE E AMANHÃ")
+
 
 # Os dados abaixo seram enviados ao telegram
-df_telegtam = df[['Dia da semana', 'Dt Comprometida', 'Cliente',
-                  'Endereço_', 'Atendente', 'Defeito Relatado', 'Descrição', 'Modalidade']]
-
-df_telegtam.to_csv('dados_para_telegram.csv', sep=";",
-                   index=False, encoding='utf-8-sig')
+df_telegram = visitas[['Dia da semana', 'Dt Comprometida', 'Cliente',
+                       'Endereço_', 'Atendente', 'Defeito Relatado', 'Descrição', 'Modalidade']]
 
 
+# criando uma nova variavel, com token do telegram, para envio das mensagens
 bot = telebot.TeleBot(TOKEN_TELEGRAM)
 
-
+# criando uma nova variavel, com caminho do ditorio dos dados de agendamento
 caminho_csv = os.getenv('caminho_do_arquivo_dos_dados_de_agendamento')
 
 
