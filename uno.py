@@ -29,7 +29,8 @@ URL = os.getenv("URL")
 TOKEN_TELEGRAM = os.getenv("TOKEN")
 # ID do usuário  que vai receber
 CHAT_ID_USER_EDER = os.getenv("CHAT_ID_PESSOAL")
-CHAT_ID_CORPORATIVO = os.getenv("CHAT_ID_CORPORATIVO")  # ID do grupo corporativo
+CHAT_ID_CORPORATIVO = os.getenv(
+    "CHAT_ID_CORPORATIVO")  # ID do grupo corporativo
 
 
 g.press("WIN")
@@ -52,15 +53,15 @@ Caso contrário, ela inicia o processo de conexão. Caso a imagem de VPN conecta
 """
 
 
-# Função para verificar se a VPN já está conectada, 
-# utilizando uma imagem de referência para identificar o status da conexão. 
-# Se a VPN estiver conectada, a função chama a função de raspagem de dados. 
-# Caso contrário, ela inicia o processo de conexão. 
-# Caso a imagem de VPN conectada não seja encontrada, a função exibe uma mensagem de erro e aguarda um momento antes de prosseguir para a próxima etapa. 
+# Função para verificar se a VPN já está conectada,
+# utilizando uma imagem de referência para identificar o status da conexão.
+# Se a VPN estiver conectada, a função chama a função de raspagem de dados.
+# Caso contrário, ela inicia o processo de conexão.
+# Caso a imagem de VPN conectada não seja encontrada, a função exibe uma mensagem de erro e aguarda um momento antes de prosseguir para a próxima etapa.
 # A função é projetada para ser robusta, lidando com possíveis exceções relacionadas à localização da imagem na tela.
 
 
-def vpn_conectada():    
+def vpn_conectada():
 
     regiao_de_cenexao_da_vpn_loc = _loc = (1156, 727, 684, 289)
 
@@ -153,11 +154,11 @@ def clicar_em_escolher_backup():
 
 
 # ______________________________________________________________________________________________
+
 """
 Região aproximada do botão "Conectar"
 Função que por fim conecta a VPN
 """
-
 
 def clicar_em_conectar():
 
@@ -209,6 +210,7 @@ def acessar_pagina(page, tentativas=3, espera=8):
 
 
 # ______________________________________________________________________________________________
+
 """
 Função para realizar a raspagem de dados, utilizando o Playwright para automação de navegador, com etapas para acessar a página, fazer login, navegar pelos frames e realizar ações para buscar e exportar os dados necessários. 
 A função inclui esperas entre as ações para garantir que os elementos estejam carregados antes de interagir com eles, e utiliza tratamento de pop-ups e downloads para salvar os arquivos exportados.
@@ -223,34 +225,34 @@ def raspagem_de_dados():
         browser = p.chromium.launch(headless=False)
         # Cria um novo contexto de navegador com a opção de aceitar downloads habilitada, permitindo que os arquivos exportados sejam baixados automaticamente durante a raspagem de dados.
         context = browser.new_context(accept_downloads=True,)
-        t.sleep(1)
+        
         page = context.new_page()
-        t.sleep(6)
+        
         acessar_pagina(page)
-        t.sleep(2)
+        
         page.get_by_role("textbox", name="Login").fill(
             usuario)  # Preenchendo o campo de login com a variável de ambiente "usuario" da minha .env\
-        t.sleep(1)
+        
         # Preenchendo o campo de senha com a variável de ambiente "senha" da minha .env
         page.get_by_role("textbox", name="Senha").fill(senha)
-        t.sleep(1)
+        
         page.get_by_role("button", name="Entrar").click()
-        t.sleep(1)
+        
         page.locator("iframe[name=\"UCommerceManagerSession\"]").content_frame.locator(
             "#frameMenu").content_frame.get_by_text("SERVIÇOS").click()
-        t.sleep(1)
+        
         page.locator("iframe[name=\"UCommerceManagerSession\"]").content_frame.locator(
             "#frameMenu").content_frame.get_by_text("FUP - Ordem de Serviço").click()
-        t.sleep(1)
+        
         page.locator("iframe[name=\"UCommerceManagerSession\"]").content_frame.locator(
             "#frameCentral").content_frame.get_by_role("checkbox", name="Selecionar Todos").check()
-        t.sleep(1)
+        
         page.locator("iframe[name=\"UCommerceManagerSession\"]").content_frame.locator(
             "#frameCentral").content_frame.get_by_role("checkbox", name="Selecionar Todos").uncheck()
-        t.sleep(1)
+        
         page.locator("iframe[name=\"UCommerceManagerSession\"]").content_frame.locator(
             "#frameCentral").content_frame.locator("tr:nth-child(4) > td:nth-child(3) > #situacoes").check()
-        t.sleep(1)
+        
         page.locator("iframe[name=\"UCommerceManagerSession\"]").content_frame.locator(
             "#frameCentral").content_frame.get_by_role("button", name="Buscar").click()
 
@@ -284,23 +286,18 @@ def raspagem_de_dados():
 try:
     t.sleep(1)
     get_bandeja_region()
-    
+
 except Error as e:
     pass
 
 
 try:
-    t.sleep(1)
+    
     # Realiza a raspagem de dados utilizando o Playwright para automação de navegador, com etapas para acessar a página, fazer login, navegar pelos frames e realizar ações para buscar e exportar os dados necessários, incluindo tratamento de pop-ups e downloads.
     raspagem_de_dados()
 except Error as e:
     pass
 
-
-t.sleep(1)
-g.press("ENTER")
-
-t.sleep(3)
 
 
 """
@@ -516,7 +513,13 @@ with open(file=f'{nome_do_arquivo}', mode='r', encoding='1252') as arquivo:
 
 regex_endereco_bloco = re.compile(r'ENDEREÇO[:]?\s*(.*)', re.IGNORECASE)
 
-# ##### MEU REGEXXXXXXx para capturar padrões de endereço comuns em São Paulo
+# ##### REGEX
+# para capturar padrões de endereço comuns em São Paulo a partir da coluna descrição,
+# mesmo que estejam entre possiveis nomes de endereço ou outros elementos de texto. 
+# incluindo possíveis abreviações e diferentes formatações, garantindo que os endereços sejam extraídos corretamente, 
+# mesmo que estejam embutidos em outros textos ou tenham formatações inconsistentes.
+# ideia é buscar o padrão "ENDEREÇO: " e capturar tudo que vem depois, 
+# até o final da string.
 regex_endereco = re.compile(r'-? RUA (.*?)-|\.? RUA (.*?)-|:? R (.*?)-|:? R: (.*?)-|:? Rua: (.*?)-|:? Rua (.*?)-|:? \. Rua (.*?)-|:? \.Rua (.*?)-|:?\.Rua (.*?)-|:? R\. (.*?)-|\
 -? AVENIDA (.*?)-|:? AV (.*?)(?= ?\?)|\.? AVENIDA (.*?)-|:? AV (.*?)-|:? AV: (.*?)-|:? Avenida: (.*?)-|:? Avenida (.*?)-|:? \. Avenida (.*?)-|:? \.Avenida (.*?)-|:?\.Avenida (.*?)-|:? AV\. (.*?)-|\
 -? ESTRADA (.*?)-|\.? ESTRADA (.*?)-|:? E (.*?)-|:? E: (.*?)-|:? Estrada: (.*?)-|:? Estrada (.*?)-|:? \. Estrada (.*?)-|:? \.Estrada (.*?)-|:?\.Estrada (.*?)-|:? E\. (.*?)-|\
@@ -527,7 +530,11 @@ regex_endereco = re.compile(r'-? RUA (.*?)-|\.? RUA (.*?)-|:? R (.*?)-|:? R: (.*
 -? VIADUTO (.*?)-|\.? VIADUTO (.*?)-|:? VD (.*?)-|:? VD: (.*?)-|:? Viaduto|\
 ', re.IGNORECASE)
 
-
+# Regex para capturar padrões de endereço comuns em São Paulo, 
+# mesmo que estejam entre possíveis nomes de endereço ou outros elementos de texto. 
+# O regex é projetado para ser flexível, permitindo variações na forma como os endereços são escritos, 
+# incluindo possíveis abreviações e diferentes formatações, garantindo que os endereços sejam extraídos corretamente, 
+# mesmo que estejam embutidos em outros textos ou tenham formatações inconsistentes.
 entregar_regex = re.compile(r'ENTREGAR|ENTREGA|DEIXAR|LEVAR', re.IGNORECASE)
 
 # lista dos dados extraidos após identificação no padrão regex( Expressão regular)
@@ -622,11 +629,15 @@ texto = texto.islower()
 print(texto)
 logradouros = r"(RUA|AVENIDA|ALAMEDA|ESTRADA|RODOVIA|TRAVESSA|PRAÇA|VIADUTO|PARQUE|VILA|PONTE|CALÇADA)"
 
+# Padrão regex para capturar padrões de endereço comuns em São Paulo, considerando variações na forma como os endereços são escritos.
 padrao = re.compile(
     rf"\b{logradouros}\b(?: [^\d\n]+)*? (?:\d{{1,6}}|S[./-]?N)\b",
     re.IGNORECASE
 )
 
+
+# Iterando sobre a lista de strings extraídas do documento de origem, 
+# aplicando o regex para capturar os padrões de endereço e armazenando os resultados na nova lista 'new_list'.
 for texto in old_list:
     texto = texto.strip()
 
@@ -647,9 +658,9 @@ for texto in old_list:
         new_list.append(erro)
 
 
-# Esse trecho de codigo pode-se ser usado para validar os dados de endereço, porem ele não extrai os dados de bairro, apenas faz um merge com "SP", por tanto, eu recomendo usar o campo "Endereço".
-###
-###
+# Esse trecho de codigo pode-se ser usado para validar os dados de endereço, 
+# porem ele não extrai os dados de bairro, apenas faz um merge com "SP", por tanto, eu recomendo usar o campo "Endereço".
+
 df['Endereço_'] = new_list
 # Aplicando a função para inserir uma vírgula entre o nome do logradouro e o número do endereço, utilizando uma expressão regular para identificar o padrão de logradouro seguido por um número, e substituindo por uma vírgula para facilitar a leitura e análise dos endereços extraídos.
 df['Endereço_'] = df['Endereço_'].apply(inserir_virgula)
@@ -771,25 +782,29 @@ def enviar_mensagem(texto):
 
         )
 
-        t.sleep(0.5)
-
+        
         URL
 
+        # lista com dois destinatários
         CHAT_IDS = [
             CHAT_ID_USER_EDER,
             CHAT_ID_CORPORATIVO,
         ]
 
+        # loop para enviar as mensagens formatadas aos dois destinatários da minha lista
         for chat_id in CHAT_IDS:
             bot.send_message(chat_id, msg, parse_mode="Markdown")
-
+            
+    # retornando a lista de mensagens formatadas, para validação dos dados enviados.
     return "\n".join(mensagens)
 
-
+#  aplicando a função de leitura do CSV para obter os dados de agendamento, para a variavel "tarefas", que será utilizada posteriormente.
 tarefas = ler_csv(caminho_csv)
+
+# função de envio de mensagens para formatar e enviar as mensagens ao Telegram os destinatários.
 enviar_mensagem(tarefas)
 
-tarefas = ler_csv(caminho_csv)
-enviar_mensagem(tarefas)
+
+
 
 print("MENSAGENS ENVIADAS COM SUCESSO AO TELEGRAM!")
