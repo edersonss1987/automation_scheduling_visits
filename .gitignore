@@ -8,6 +8,11 @@ __pycache__/
 
 # Jupyter
 .ipynb_checkpoints/
+<<<<<<< HEAD
+=======
+.ipynb
+*.ipynb
+>>>>>>> 06ebf5f (add requirements)
 
 # VS Code
 .vscode/
