@@ -1,7 +1,7 @@
 UNO_USER ="xxxxx"
 UNO_PASSWORD = "xxxxxx"
 
-URL = "http://uno.controlid.com.br:8080/Controlid/sgw0001.do?method=login"
+URL = "http://eder.controlid.com.br:/Controlid/sgw0001.do?method=login"
 
 caminho_do_arquivo_dos_dados_de_agendamento = "D:\\Documentos\\zzzzzzzzz\\dados_para_telegram.csv"
 
