@@ -1,0 +1,19 @@
+UNO_USER ="xxxxx"
+UNO_PASSWORD = "xxxxxx"
+
+URL = "http://uno.controlid.com.br:8080/Controlid/sgw0001.do?method=login"
+
+caminho_do_arquivo_dos_dados_de_agendamento = "D:\\Documentos\\EDER-LAPTOP-V1LI7TEI\\Programas\\automation_scheduling_visits\\dados_para_telegram.csv"
+
+
+# Substitua pelo seu token do BotFather
+#Nome: Agendamento_UNO
+#nome o bot: uno_agendamento_bot
+
+
+TOKEN = "EEEEEEE5139058:AAFJR7tl_u4iErV7pOztwoYavAVY1234567"
+CHAT_ID_PESSOAL = "5154XXXXX"  # ID do usuário  que vai receber
+CHAT_ID_CORPORATIVO = "6310XXXXXX"  # ID do grupo corporativo
+
+# g.displayMousePosition()
+# screenWidth, screenHeight = g.size()
